@@ -52,5 +52,48 @@ class MachineTest(unittest.TestCase):
         machine.pressButton("A")
 
         self.assertEqual(machine.racks["A"].quantity, 0)
-        self.assertEqual(machine.coins[Coin.QUARTER], 5)
-        self.assertEqual(machine.amount, 25)
+        self.assertEqual(machine.coins[Coin.QUARTER], 4)
+        self.assertEqual(machine.amount, 0)
+
+    def test_change_return_after_purchase(self):
+        racks = [ Rack("A", "Biscuits", 100) ]
+        machine = Machine(racks)
+        machine.refill("A", 1)
+
+        for i in range(5):
+            machine.insertCoin(Coin.QUARTER)
+
+        machine.pressButton("A")
+        self.assertEqual(machine.coins[Coin.QUARTER], 4)
+
+    def test_change_return_after_purchase_shuffle(self):
+        racks = [ Rack("A", "Biscuits", 100) ]
+        machine = Machine(racks)
+        machine.refill("A", 1)
+
+        for i in range(5):
+            machine.insertCoin(Coin.DIME)
+
+        machine.insertCoin(Coin.NICKEL)
+
+        for i in range(3):
+            machine.insertCoin(Coin.QUARTER)
+
+        machine.pressButton("A")
+        self.assertEqual(machine.coins[Coin.DIME], 3)
+        self.assertEqual(machine.coins[Coin.NICKEL], 0)
+        self.assertEqual(machine.coins[Coin.QUARTER], 3)
+
+    def test_change_return_after_purchase_no_exact_change(self):
+        racks = [ Rack("A", "Biscuits", 100) ]
+        machine = Machine(racks)
+        machine.refill("A", 1)
+
+        for i in range(8):
+            machine.insertCoin(Coin.DIME)
+
+        machine.insertCoin(Coin.QUARTER)
+
+        machine.pressButton("A")
+        self.assertEqual(machine.coins[Coin.DIME], 8)
+        self.assertEqual(machine.coins[Coin.QUARTER], 1)
